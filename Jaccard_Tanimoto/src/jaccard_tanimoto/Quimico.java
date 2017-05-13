@@ -23,7 +23,7 @@ public class Quimico {
     
     
     ArrayList <String> info_compuestos = new ArrayList<>();//ArrayList almacena el ID y la fórmula de cada compuesto en el archivo tsv. 
-    ArrayList <String> formulas = new ArrayList<>();
+    ArrayList <String> formulas = new ArrayList<>();//ArrayList almacena solo las formulas de cada compuesto ingresado por tsv
     
     String token[];
     String [] aux= new String [200];
