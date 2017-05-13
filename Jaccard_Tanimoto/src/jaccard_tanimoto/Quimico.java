@@ -20,7 +20,9 @@ import java.util.TreeMap;
  * @author andres
  */
 public class Quimico {
-    ArrayList <String> info_compuestos = new ArrayList<>();
+    
+    
+    ArrayList <String> info_compuestos = new ArrayList<>();//ArrayList almacena el ID y la fórmula de cada compuesto en el archivo tsv. 
     ArrayList <String> formulas = new ArrayList<>();
     
     String token[];
