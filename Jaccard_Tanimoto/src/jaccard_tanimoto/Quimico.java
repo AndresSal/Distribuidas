@@ -21,16 +21,15 @@ import java.util.TreeMap;
  */
 public class Quimico {
     
-    
     ArrayList <String> info_compuestos = new ArrayList<>();//ArrayList almacena el ID y la fórmula de cada compuesto en el archivo tsv. 
     ArrayList <String> formulas = new ArrayList<>();//ArrayList almacena solo las formulas de cada compuesto ingresado por tsv
-    
     String token[];
     String [] aux= new String [200];
     HashMap <String,String> mat = new HashMap<>();
     
     
-    HashMap <String[],Float> comparaciones = new HashMap<>(); 
+//    HashMap <String[],Float> comparaciones = new HashMap<>(); 
+    TreeMap <String,Float> comparaciones = new TreeMap<>(); 
     
     
     
@@ -111,42 +110,51 @@ public class Quimico {
     
     public void ManejoCaracteres()
     {        
+        
         for (int i=0;i<aux.length;i++)
         {
-
             if(aux[i]!=null)
             {
-                int Na = 0;
-//                System.out.println("\n Formula actual: "+aux[i].toString()+"\n");
-//                System.out.println("\n Numero de caracteres en la formula actual: \n");
+                int Na = 0;    
                 TreeMap<Character,Integer> mapa_a = SepararCaracteres(aux[i]);
                 Na=NumeroCaracteres(mapa_a);
+                
                 System.out.println("\n Na de la formula actual: "+Na+"\n");
                 
                 for (int j = 1; j<aux.length;j++)
                 {
                     int Nb = 0;
+                    
                     if(aux[j]!= null)
                     {
                         TreeMap<Character,Integer> mapa_b = SepararCaracteres(aux[j]);
                         Nb = NumeroCaracteres(mapa_b);
+                        
                         System.out.println("\n Nb de la formula actual: "+Nb+"\n");
+                        
                         int Nc = 0;
                         Nc = Comparacion_Formulas(mapa_a, mapa_b);
+                        
                         System.out.println("\n Nc: "+Nc);
+                        
                         float T = (float)Nc/(Na+Nb-Nc); 
                         
-                        String []caracteres= new String[2];
+//                        String []caracteres= new String[2];
+                        String caracteres= "";
+                        
                         for (Map.Entry<String,String> mp:mat.entrySet())
                         {
                             String formula = mp.getValue();
                                 if(formula.compareTo(aux[i]) == 0)
                                 {
-                                    caracteres[0]=mp.getKey();
+//                                    caracteres[0]=mp.getKey();
+                                    caracteres+=mp.getKey();
                                 }
                                 if (formula.compareTo(aux[j]) == 0)
                                 {
-                                    caracteres[1]=mp.getKey();
+//                                    caracteres[1]=mp.getKey();
+                                    caracteres+=" ";
+                                    caracteres+=mp.getKey();
                                 }
                             
                         }
@@ -157,12 +165,15 @@ public class Quimico {
             }
 
         }
-        for (Map.Entry<String[],Float> ent:comparaciones.entrySet())
+        
+        for (Map.Entry<String,Float> ent:comparaciones.entrySet())
         {
-            String [] compuestos=ent.getKey();
+            String  compuestos=ent.getKey();
             float CBT =ent.getValue();
-            System.out.println(Arrays.toString(compuestos)+" - "+CBT);
+            System.out.println(compuestos+" - "+CBT);
         }
+        
+        
     }
     
     public int Comparacion_Formulas( TreeMap A, TreeMap B )
@@ -254,4 +265,5 @@ public class Quimico {
         
         return total;
     }
+    
 }

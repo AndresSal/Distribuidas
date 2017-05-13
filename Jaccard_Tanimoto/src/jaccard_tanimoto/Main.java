@@ -16,6 +16,8 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        long t1, t2;
+        t1=System.currentTimeMillis();
         Quimico q = new Quimico();
     
         q.leer_info("//src//jaccard_tanimoto//chemicals.tsv");
@@ -24,6 +26,8 @@ public class Main {
         q.ObtenerFormulaporArray();
         
         q.ManejoCaracteres();
+        t2=System.currentTimeMillis();
+        System.out.println("La tarea se demoró: "+(t2-t1)/1000+" segundos");
     }
     
 }
