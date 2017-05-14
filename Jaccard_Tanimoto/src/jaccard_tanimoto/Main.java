@@ -14,13 +14,13 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         // TODO code application logic here
         long t1, t2;
         t1=System.currentTimeMillis();
         Quimico q = new Quimico();
     
-        q.leer_info("//src//jaccard_tanimoto//chemicals.tsv");
+        q.leer_info("//src//jaccard_tanimoto//ZINC_chemicals.tsv");
 
         //q.ObtenerFormula();
         q.ObtenerFormulaporArray();

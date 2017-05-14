@@ -8,11 +8,12 @@ package jaccard_tanimoto;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /**
@@ -22,89 +23,55 @@ import java.util.TreeMap;
 public class Quimico {
     
     ArrayList <String> info_compuestos = new ArrayList<>();//ArrayList almacena el ID y la fórmula de cada compuesto en el archivo tsv. 
-    ArrayList <String> formulas = new ArrayList<>();//ArrayList almacena solo las formulas de cada compuesto ingresado por tsv
-    String token[];
-    String [] aux= new String [200];
-    HashMap <String,String> mat = new HashMap<>();
+    //ArrayList <String> formulas = new ArrayList<>();//ArrayList almacena solo las formulas de cada compuesto ingresado por tsv
+    String token[], aux[];
+    public static HashMap <String,String> mat = new HashMap<>();
+//    TreeMap <String,Float> comparaciones = new TreeMap<>(); 
+    
+    HashMap <String[],Float> comparaciones = new HashMap<>(); 
     
     
-//    HashMap <String[],Float> comparaciones = new HashMap<>(); 
-    TreeMap <String,Float> comparaciones = new TreeMap<>(); 
     
     
-    
-    public void leer_info(String dir) 
+    public void leer_info(String dir) throws InterruptedException
     {
          try 
          {
                 info_compuestos = (ArrayList<String>) Files.readAllLines(Paths.get(System.getProperty("user.dir") + dir));
-                
-                for(int i =0; i< info_compuestos.size();i++)
-                {
-                    token = info_compuestos.get(i).split("\t");
-                    token[1] = limpiar_formula(token[1]);
-                    
-                    mat.put(token[0].trim(), token[1].trim());
-                }
-                
-                    mat.remove("chemical_id","formula");
-            
-            
-                for (Map.Entry<String,String> mat : mat.entrySet()) 
-                {
-                    String id = mat.getKey();
-                    String formula =mat.getValue();
-                    //System.out.println(id+"-"+formula);
-                }
-                
+                      
+                Thread t0 = new Thread(new QuimicoThread(info_compuestos, 0));
+                Thread t1 = new Thread(new QuimicoThread(info_compuestos, 1));
+
+                t0.start();
+                t1.start();
+
+                t0.join();
+                t1.join();
+         
+         aux = new String[mat.size()];
          } 
          
+                  
          catch (IOException e) 
          {
              System.out.println("no se pudo leer el archivo "+e);
          }
     
     }
-
-    private String limpiar_formula(String formula)
-    {
-        formula=formula.replaceAll("[+|\\-|=|\\[|\\]|//(|//)|\\\\|[0-9]]","");
-        return formula;
-    }
     
     public String [] ObtenerFormulaporArray()
     {
         int i=0;
+        
         for(Map.Entry <String,String> mat : mat.entrySet())
         {
             aux[i]=mat.getValue();
             i++;
         }
+        
         return aux;
 
     }
-    
-    public void ObtenerFormula()
-    {
-       formulas=new ArrayList<String>();
-        for (Map.Entry<String,String> mat: mat.entrySet())
-        {
-            formulas.add(mat.getValue());
-            
-        }
-        
-        //Impresion
-        Iterator iterador = formulas.iterator();
-        
-        System.out.println("Formulas: ");
-        while(iterador.hasNext())
-        {
-            Object objeto = iterador.next();
-            System.out.println(objeto);
-        }
-    }
-    
-    
     
     int a = 0;
     
@@ -130,51 +97,62 @@ public class Quimico {
                         TreeMap<Character,Integer> mapa_b = SepararCaracteres(aux[j]);
                         Nb = NumeroCaracteres(mapa_b);
                         
-                        System.out.println("\n Nb de la formula actual: "+Nb+"\n");
+//                        System.out.println("\n Nb de la formula actual: "+Nb+"\n");
                         
                         int Nc = 0;
                         Nc = Comparacion_Formulas(mapa_a, mapa_b);
                         
-                        System.out.println("\n Nc: "+Nc);
+//                        System.out.println("\n Nc: "+Nc);
+                                  
+                        String []caracteres= new String[2];
+                        //String caracteres= "";
                         
-                        float T = (float)Nc/(Na+Nb-Nc); 
-                        
-//                        String []caracteres= new String[2];
-                        String caracteres= "";
-                        
-                        for (Map.Entry<String,String> mp:mat.entrySet())
+                        for (Entry<String,String> mp:mat.entrySet())
                         {
                             String formula = mp.getValue();
-                                if(formula.compareTo(aux[i]) == 0)
+                                if(formula.equals(aux[i]))
                                 {
-//                                    caracteres[0]=mp.getKey();
-                                    caracteres+=mp.getKey();
+                                    caracteres[0]=mp.getKey();
+                                    //caracteres+=" "+mp.getKey();
                                 }
-                                if (formula.compareTo(aux[j]) == 0)
+                                if (formula.equals(aux[j]))
                                 {
-//                                    caracteres[1]=mp.getKey();
-                                    caracteres+=" ";
-                                    caracteres+=mp.getKey();
-                                }
-                            
+                                    caracteres[1]=mp.getKey();
+//                                    caracteres+=" "+mp.getKey();
+                                }   
                         }
                         
-                        comparaciones.put(caracteres, T);
+                        if(CoeficienteJT(Na,Nb,Nc) >= 0.5)
+                        {
+                            if(!caracteres[0].equals(caracteres[1]))
+                            {
+                                comparaciones.put(caracteres, CoeficienteJT(Na, Nb, Nc));
+                            }
+                        }
+                        
                     }
                 }
             }
 
         }
         
-        for (Map.Entry<String,Float> ent:comparaciones.entrySet())
+        for (Entry<String[],Float> ent:comparaciones.entrySet())
         {
-            String  compuestos=ent.getKey();
+            String [] compuestos=ent.getKey();
             float CBT =ent.getValue();
-            System.out.println(compuestos+" - "+CBT);
+            DecimalFormat df = new DecimalFormat("0.00");
+            System.out.println(compuestos+" - "+df.format(CBT));
         }
         
         
     }
+    
+    public float CoeficienteJT(int Na, int Nb, int Nc)
+    {
+        float T;
+        T = (float) Nc/(Na+Nb-Nc);
+        return T;
+    } 
     
     public int Comparacion_Formulas( TreeMap A, TreeMap B )
     {
@@ -242,15 +220,21 @@ public class Quimico {
                     
             }
         }
+         
+        return tabla;
         
-        for (Map.Entry<Character, Integer>tab:tabla.entrySet())
+    }
+    
+    public void ImprimirCaracteresTabla(TreeMap tabla)
+    {
+        TreeMap <Character, Integer> resultado = tabla;         
+        
+        for (Map.Entry<Character, Integer>tab:resultado.entrySet())
         {
             Character caracter = tab.getKey();
             int repeticion = tab.getValue();
             System.out.println(caracter+"-"+repeticion);
         }
-        
-        return tabla;
         
     }
     
@@ -258,6 +242,7 @@ public class Quimico {
     {
         TreeMap <Character,Integer> mapa=parametro;
         int total = 0;
+        
         for(Map.Entry<Character, Integer> arbol:mapa.entrySet())
         {
             total+=arbol.getValue();
@@ -266,4 +251,24 @@ public class Quimico {
         return total;
     }
     
+    
+//    public void ObtenerFormula()
+//    {
+//       formulas=new ArrayList<String>();
+//        for (Map.Entry<String,String> mat: mat.entrySet())
+//        {
+//            formulas.add(mat.getValue());
+//            
+//        }
+//        
+//        //Impresion
+//        Iterator iterador = formulas.iterator();
+//        
+//        System.out.println("Formulas: ");
+//        while(iterador.hasNext())
+//        {
+//            Object objeto = iterador.next();
+//            System.out.println(objeto);
+//        }
+//    }
 }
