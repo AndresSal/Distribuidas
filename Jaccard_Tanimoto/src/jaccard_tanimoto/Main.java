@@ -20,7 +20,7 @@ public class Main {
         t1=System.currentTimeMillis();
         Quimico q = new Quimico();
     
-        q.leer_info("//src//jaccard_tanimoto//ZINC_chemicals.tsv");
+        q.leer_info("//src//jaccard_tanimoto//ZINC_chemicals_X_2mil.tsv");
 
         //q.ObtenerFormula();
         q.ObtenerFormulaporArray();

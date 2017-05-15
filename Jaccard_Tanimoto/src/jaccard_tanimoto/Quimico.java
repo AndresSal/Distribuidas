@@ -10,11 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  *
@@ -23,12 +27,12 @@ import java.util.TreeMap;
 public class Quimico {
     
     ArrayList <String> info_compuestos = new ArrayList<>();//ArrayList almacena el ID y la fórmula de cada compuesto en el archivo tsv. 
-    //ArrayList <String> formulas = new ArrayList<>();//ArrayList almacena solo las formulas de cada compuesto ingresado por tsv
-    String token[], aux[];
+    String token[], aux[] =  new String[50000];
     public static HashMap <String,String> mat = new HashMap<>();
-//    TreeMap <String,Float> comparaciones = new TreeMap<>(); 
+//    HashMap <String[],Float> comparaciones = new HashMap<>(); 
+    TreeMap <String,Float> comparaciones = new TreeMap<>(); 
     
-    HashMap <String[],Float> comparaciones = new HashMap<>(); 
+    
     
     
     
@@ -39,16 +43,30 @@ public class Quimico {
          {
                 info_compuestos = (ArrayList<String>) Files.readAllLines(Paths.get(System.getProperty("user.dir") + dir));
                       
-                Thread t0 = new Thread(new QuimicoThread(info_compuestos, 0));
-                Thread t1 = new Thread(new QuimicoThread(info_compuestos, 1));
+                ExecutorService executor = Executors.newFixedThreadPool(4);
+                for (String sentencia:info_compuestos)
+                {
+                    Runnable hilo = new Hilo(sentencia);
+                    executor.execute(hilo);
+                }
+                
+                executor.shutdown();
+                while(!executor.isTerminated())
+                
+                {
+                
+                }
+//                Thread t0 = new Thread(new QuimicoThread(info_compuestos, 0));
+//                Thread t1 = new Thread(new QuimicoThread(info_compuestos, 1));
+//
+//                t0.start();
+//                t1.start();
+//
+//                t0.join();
+//                t1.join();
 
-                t0.start();
-                t1.start();
-
-                t0.join();
-                t1.join();
-         
-         aux = new String[mat.size()];
+                mat.remove("chemical_id","formula");
+//                aux = new String[mat.size()];
          } 
          
                   
@@ -86,7 +104,7 @@ public class Quimico {
                 TreeMap<Character,Integer> mapa_a = SepararCaracteres(aux[i]);
                 Na=NumeroCaracteres(mapa_a);
                 
-                System.out.println("\n Na de la formula actual: "+Na+"\n");
+                System.out.println("\n Numero de caracteres de "+aux[i]+": "+Na+"\n");
                 
                 for (int j = 1; j<aux.length;j++)
                 {
@@ -103,31 +121,28 @@ public class Quimico {
                         Nc = Comparacion_Formulas(mapa_a, mapa_b);
                         
 //                        System.out.println("\n Nc: "+Nc);
-                                  
-                        String []caracteres= new String[2];
-                        //String caracteres= "";
+                        float T=CoeficienteJT(Na, Nb, Nc);
+                        //String []caracteres= new String[2];
+                        String caracteres= "";
                         
                         for (Entry<String,String> mp:mat.entrySet())
                         {
                             String formula = mp.getValue();
                                 if(formula.equals(aux[i]))
                                 {
-                                    caracteres[0]=mp.getKey();
+                                    caracteres+= " "+mp.getKey();
                                     //caracteres+=" "+mp.getKey();
                                 }
                                 if (formula.equals(aux[j]))
                                 {
-                                    caracteres[1]=mp.getKey();
-//                                    caracteres+=" "+mp.getKey();
+                                    //caracteres[1]=mp.getKey();
+                                    caracteres+=" "+mp.getKey();
                                 }   
                         }
                         
-                        if(CoeficienteJT(Na,Nb,Nc) >= 0.5)
+                        if(T >= 0.5)
                         {
-                            if(!caracteres[0].equals(caracteres[1]))
-                            {
-                                comparaciones.put(caracteres, CoeficienteJT(Na, Nb, Nc));
-                            }
+                                comparaciones.put(caracteres, T);    
                         }
                         
                     }
@@ -136,18 +151,19 @@ public class Quimico {
 
         }
         
-        for (Entry<String[],Float> ent:comparaciones.entrySet())
+        for (Entry<String,Float> ent:comparaciones.entrySet())
         {
-            String [] compuestos=ent.getKey();
+            String compuestos=ent.getKey();
             float CBT =ent.getValue();
             DecimalFormat df = new DecimalFormat("0.00");
+//            System.out.println(Arrays.toString(compuestos)+" - "+df.format(CBT));
             System.out.println(compuestos+" - "+df.format(CBT));
         }
         
         
     }
-    
-    public float CoeficienteJT(int Na, int Nb, int Nc)
+        
+    public float CoeficienteJT(int Na, int Nb, int Nc) //no paralelizable
     {
         float T;
         T = (float) Nc/(Na+Nb-Nc);

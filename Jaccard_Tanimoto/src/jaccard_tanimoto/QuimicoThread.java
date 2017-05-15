@@ -33,7 +33,7 @@ public class QuimicoThread extends Thread implements Runnable
     {
         for (int i = indice; i < leer_info.size();i+=2)
         {
-            this.esperarXsegundos();
+//            this.esperarXsegundos();
             String[] token = leer_info.get(i).split("\t");
             token[3] = limpiar_formula(token[3]);
             mat.put(token[1].trim(), token[3].trim());
@@ -51,7 +51,7 @@ public class QuimicoThread extends Thread implements Runnable
     {
         try
         {
-            Thread.sleep(10*1000);
+            Thread.sleep(3*1000);
         }
         catch(InterruptedException ex)
         {
