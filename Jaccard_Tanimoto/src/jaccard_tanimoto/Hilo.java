@@ -4,7 +4,15 @@
  * and open the template in the editor.
  */
 package jaccard_tanimoto;
+
+
+import static jaccard_tanimoto.Quimico.comparaciones;
 import static jaccard_tanimoto.Quimico.mat;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
@@ -12,6 +20,9 @@ import static jaccard_tanimoto.Quimico.mat;
  */
 public class Hilo implements Runnable {
     String sentencia;
+    Quimico quimico = new Quimico();
+  public static ArrayList<String>   aux =  new ArrayList<>();  
+     
 
     public Hilo(String sentencia) {
         this.sentencia = sentencia;
@@ -22,36 +33,42 @@ public class Hilo implements Runnable {
     
     
     
-     private synchronized void leer_info(String sentencia) 
-    {
-//        esperarXsegundos();
-        String token [] = sentencia.split("\t");
-        token[3] = limpiar_formula(token[3]);
-        mat.put(token[1].trim(), token[3].trim());
-    }
+//     private synchronized void leer_info(String sentencia) 
+//    {
+////        esperarXsegundos();
+//        String token [] = sentencia.split("\t");
+//        token[1] = limpiar_formula(token[1]);
+//        mat.put(token[0].trim(), token[1].trim());
+//    }
         
-    private String limpiar_formula(String formula)
-    {
-        formula=formula.replaceAll("[+|\\-|=|\\[|\\]|//(|//)|\\\\|[0-9]]","");
-        return formula;
-    }
+    
 
     @Override
     public void run() {
-        leer_info(sentencia);
+        //leer_info(sentencia);
+        ObtenerFormulaporArray();
+        
     }
     
-    private void esperarXsegundos()
+    private synchronized  void ObtenerFormulaporArray()
     {
-        try
+        //int i=0;
+        //recorrido de cada par de llaves y valor del hashmap.
+        for(Map.Entry <String,String> mat : mat.entrySet())
         {
-            Thread.sleep(3*1000);
+            //almacenado en un arreglo la formula de la iteraccion i.
+            aux.add(mat.getValue());
+            
         }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
+        
+        //return aux;
+
     }
+   
+    
+    
+   
+    
 }
 
 

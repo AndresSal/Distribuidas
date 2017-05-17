@@ -5,6 +5,7 @@
  */
 package jaccard_tanimoto;
 
+
 /**
  *
  * @author andres
@@ -17,15 +18,21 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         // TODO code application logic here
         long t1, t2;
+         
         t1=System.currentTimeMillis();
         Quimico q = new Quimico();
     
-        q.leer_info("//src//jaccard_tanimoto//ZINC_chemicals_X_6mil.tsv");
+        q.leer_info("//src//jaccard_tanimoto//ZINC_chemicals_X_2mil.tsv");
 
-        //q.ObtenerFormula();
-        q.ObtenerFormulaporArray();
+      // q.imprimir();
+       // QuimicoThread qt= new QuimicoThread();
+      // a.put(1, "Hola");
+      // Entry<Integer,String> m=(Entry<Integer,String>) a.entrySet();
+       //System.out.println(a.values());
         
-        q.ManejoCaracteres();
+        
+       
+
         t2=System.currentTimeMillis();
         System.out.println("La tarea se demoró: "+(t2-t1)/1000+" segundos");
     }
