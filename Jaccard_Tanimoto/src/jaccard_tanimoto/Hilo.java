@@ -6,69 +6,109 @@
 package jaccard_tanimoto;
 
 
-import static jaccard_tanimoto.Quimico.comparaciones;
-import static jaccard_tanimoto.Quimico.mat;
 
-import java.text.DecimalFormat;
+
+import static jaccard_tanimoto.Quimicos.T;
 import java.util.ArrayList;
+
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  *
- * @author andres
+ * @author joselimaico
  */
-public class Hilo implements Runnable {
-    String sentencia;
-    Quimico quimico = new Quimico();
-  public static ArrayList<String>   aux =  new ArrayList<>();  
-     
+public class Hilo extends Thread implements Runnable {
 
-    public Hilo(String sentencia) {
-        this.sentencia = sentencia;
+    ArrayList<Character> caracteres = new ArrayList<>();
+    TreeMap<Character, Integer> mapa_a = new TreeMap<>();
+    TreeMap<Character, Integer> mapa_b = new TreeMap<>();
+    
+    String a,b;
+
+    public Hilo(String a,String b) {
+
+
+        this.a=a;
+        this.b=b;
+
     }
 
-    public Hilo() {
-    }
-    
-    
-    
-//     private synchronized void leer_info(String sentencia) 
-//    {
-////        esperarXsegundos();
-//        String token [] = sentencia.split("\t");
-//        token[1] = limpiar_formula(token[1]);
-//        mat.put(token[0].trim(), token[1].trim());
-//    }
-        
-    
 
     @Override
     public void run() {
-        //leer_info(sentencia);
-        ObtenerFormulaporArray();
-        
+        T(a,b);
+
     }
-    
-    private synchronized  void ObtenerFormulaporArray()
-    {
-        //int i=0;
-        //recorrido de cada par de llaves y valor del hashmap.
-        for(Map.Entry <String,String> mat : mat.entrySet())
-        {
-            //almacenado en un arreglo la formula de la iteraccion i.
-            aux.add(mat.getValue());
-            
+
+    public synchronized void T(String a, String b) {
+
+        int Na = 0, Nb = 0, Nc = 0;
+        Na=contarCaracteres(a, mapa_a);
+        Nb=contarCaracteres(b, mapa_b);
+        Nc=Comparacion_Formulas(mapa_a, mapa_b);
+        mapa_a.clear();
+        mapa_b.clear();
+         T=(float)Nc/(Na+Nb-Nc);
+
+    }
+
+    public int Comparacion_Formulas(TreeMap<Character,Integer> A, TreeMap <Character,Integer> B) {
+        int comunes = 0;
+
+        for (Map.Entry<Character, Integer> mA : A.entrySet()) {
+            for (Map.Entry<Character, Integer> mB : B.entrySet()) {
+                if (mA.getKey().equals(mB.getKey())) {
+                    if (mA.getValue() <= mB.getValue() ) {
+                        comunes += mA.getValue();
+                    } else {
+                        comunes += mB.getValue();
+                    }
+                }
+            }
         }
-        
-        //return aux;
-
+        return comunes;
     }
-   
-    
-    
-   
-    
+
+    public int contarCaracteres(String formula,TreeMap<Character,Integer> tabla) {
+        int cont;
+         
+
+        for (int i = 0; i < formula.length(); i++) {
+
+            caracteres.add(formula.charAt(i));
+        }
+        for (char expresion : caracteres) {
+            cont = 0;
+            switch (expresion) {
+                case '@':
+                    tabla.put(expresion, 1);
+
+                    break;
+
+                default:
+                    for(int i=0;i<caracteres.size();i++){
+                    if (expresion==caracteres.get(i)) {
+                            cont++;
+                            
+                        
+                    }
+                    
+                    }
+                    tabla.put(expresion, cont);
+                        
+                    break;
+
+            }
+        }
+        cont=0;
+        for(Map.Entry<Character,Integer> t:tabla.entrySet()){
+        
+            cont+=t.getValue();
+        }
+        caracteres.clear();
+        return cont;
+        
+    }
+
 }
-
-
